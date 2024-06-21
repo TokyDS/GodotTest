@@ -1,0 +1,114 @@
+[gd_scene load_steps=14 format=3 uid="uid://c877h87b205cq"]
+
+[ext_resource type="Texture2D" uid="uid://bh4jwqmeygpty" path="res://Assets/PrototypeHero.png" id="1_rgxi3"]
+[ext_resource type="Script" path="res://Scripts/Mob/Mob.gd" id="1_u61co"]
+[ext_resource type="Script" path="res://Scripts/States/StateMachine.gd" id="3_w2qd7"]
+[ext_resource type="Script" path="res://Scripts/States/Mob/MobIdle.gd" id="4_x5dob"]
+[ext_resource type="Script" path="res://Scripts/States/Mob/MobFollow.gd" id="5_xfkje"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uron5"]
+atlas = ExtResource("1_rgxi3")
+region = Rect2(0, 64, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6qrbc"]
+atlas = ExtResource("1_rgxi3")
+region = Rect2(16, 64, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4aks5"]
+atlas = ExtResource("1_rgxi3")
+region = Rect2(32, 64, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ae045"]
+atlas = ExtResource("1_rgxi3")
+region = Rect2(48, 64, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_im7lf"]
+atlas = ExtResource("1_rgxi3")
+region = Rect2(64, 64, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_eo71m"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uron5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6qrbc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4aks5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ae045")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_im7lf")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fbjfm"]
+radius = 5.0
+
+[sub_resource type="GDScript" id="GDScript_r1gpg"]
+script/source = "extends Node
+class_name Seeker
+
+@onready var mob = $\".\"
+var target : Node2D = null
+@onready var navigation_agent= $\"../NavigationAgent2D\"
+
+# Called when the node enters the scene tree for the first time.
+func _ready(): 
+	target = mob.target
+	call_deferred(\"seeker_setup\")
+
+func seeker_setup():
+	await get_tree().physics_frame
+	if target:
+		navigation_agent.target_position = target.global_position
+
+func seeker_update(movement_speed : float):
+	if target:
+		navigation_agent.target_position = target.global_position
+	#if navigation_agent.is_navigation_finished():
+		#return
+	var current_agent_position = mob.global_position
+	var next_path_position = navigation_agent.get_next_path_position()
+	print_debug(current_agent_position.direction_to(next_path_position))
+	mob.velocity = current_agent_position.direction_to(next_path_position) * movement_speed
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
+[node name="Mob" type="CharacterBody2D"]
+position = Vector2(0, -8)
+script = ExtResource("1_u61co")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_eo71m")
+animation = &"Idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
+shape = SubResource("CircleShape2D_fbjfm")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_w2qd7")
+initial_state = NodePath("MobFollow")
+
+[node name="MobIdle" type="Node" parent="StateMachine"]
+script = ExtResource("4_x5dob")
+
+[node name="MobFollow" type="Node" parent="StateMachine" node_paths=PackedStringArray("mob")]
+script = ExtResource("5_xfkje")
+mob = NodePath("../..")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+debug_enabled = true
+
+[node name="Seeker" type="Node2D" parent="."]
+script = SubResource("GDScript_r1gpg")
