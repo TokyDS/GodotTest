@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://c877h87b205cq"]
+[gd_scene load_steps=13 format=3 uid="uid://c877h87b205cq"]
 
 [ext_resource type="Texture2D" uid="uid://bh4jwqmeygpty" path="res://Assets/PrototypeHero.png" id="1_rgxi3"]
 [ext_resource type="Script" path="res://Scripts/Mob/Mob.gd" id="1_u61co"]
@@ -52,40 +52,11 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_fbjfm"]
 radius = 5.0
 
-[sub_resource type="GDScript" id="GDScript_r1gpg"]
-script/source = "extends Node
-class_name Seeker
-
-@onready var mob = $\".\"
-var target : Node2D = null
-@onready var navigation_agent= $\"../NavigationAgent2D\"
-
-# Called when the node enters the scene tree for the first time.
-func _ready(): 
-	target = mob.target
-	call_deferred(\"seeker_setup\")
-
-func seeker_setup():
-	await get_tree().physics_frame
-	if target:
-		navigation_agent.target_position = target.global_position
-
-func seeker_update(movement_speed : float):
-	if target:
-		navigation_agent.target_position = target.global_position
-	#if navigation_agent.is_navigation_finished():
-		#return
-	var current_agent_position = mob.global_position
-	var next_path_position = navigation_agent.get_next_path_position()
-	print_debug(current_agent_position.direction_to(next_path_position))
-	mob.velocity = current_agent_position.direction_to(next_path_position) * movement_speed
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-"
-
-[node name="Mob" type="CharacterBody2D"]
+[node name="Mob" type="CharacterBody2D" groups=["mobs"]]
 position = Vector2(0, -8)
+collision_layer = 2
+collision_mask = 15
+motion_mode = 1
 script = ExtResource("1_u61co")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -108,7 +79,13 @@ script = ExtResource("5_xfkje")
 mob = NodePath("../..")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_desired_distance = 16.0
+target_desired_distance = 16.4
+path_postprocessing = 1
+avoidance_enabled = true
+radius = 9.72
+avoidance_layers = 2
+avoidance_mask = 2
 debug_enabled = true
 
-[node name="Seeker" type="Node2D" parent="."]
-script = SubResource("GDScript_r1gpg")
+[connection signal="velocity_computed" from="NavigationAgent2D" to="StateMachine/MobFollow" method="_on_navigation_agent_2d_velocity_computed"]
