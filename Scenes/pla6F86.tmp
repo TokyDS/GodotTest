@@ -1,0 +1,154 @@
+[gd_scene load_steps=20 format=3 uid="uid://eeaemjuemfyn"]
+
+[ext_resource type="Script" path="res://scripts/Player/player.gd" id="1_7x4ha"]
+[ext_resource type="Texture2D" uid="uid://bh4jwqmeygpty" path="res://assets/PrototypeHero.png" id="1_jhriq"]
+[ext_resource type="Script" path="res://states/StateMachine.gd" id="3_f6nhc"]
+[ext_resource type="Script" path="res://scripts/Player/States/PlayerIdle.gd" id="4_h0d0m"]
+[ext_resource type="Script" path="res://states/State.gd" id="5_pqjp4"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1haui"]
+radius = 5.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ykles"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(0, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndtam"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(64, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jhj47"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(0, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7oi0o"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(16, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l7bxq"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_37f4w"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(48, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0chif"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yasci"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hgdl0"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(0, 64, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gsfsi"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(16, 64, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e3pjt"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ywmt"]
+atlas = ExtResource("1_jhriq")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_g8w18"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ykles")
+}, {
+"duration": 0.25,
+"texture": SubResource("AtlasTexture_ndtam")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jhj47")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7oi0o")
+}],
+"loop": true,
+"name": &"RunDown",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l7bxq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_37f4w")
+}],
+"loop": true,
+"name": &"RunDownHorizontal",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0chif")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yasci")
+}],
+"loop": true,
+"name": &"RunHorizontal",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hgdl0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gsfsi")
+}],
+"loop": true,
+"name": &"RunUp",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e3pjt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ywmt")
+}],
+"loop": true,
+"name": &"RunUpHorizontal",
+"speed": 5.0
+}]
+
+[node name="Player" type="CharacterBody2D"]
+position = Vector2(2, -61)
+script = ExtResource("1_7x4ha")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3)
+shape = SubResource("CircleShape2D_1haui")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_g8w18")
+animation = &"RunDown"
+frame_progress = 0.360872
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_f6nhc")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4_h0d0m")
+
+[node name="Moving" type="Node" parent="StateMachine"]
+script = ExtResource("5_pqjp4")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("5_pqjp4")
